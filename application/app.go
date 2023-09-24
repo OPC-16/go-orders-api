@@ -4,10 +4,13 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type App struct {
     router http.Handler
+    rdb *redis.Client
 }
 
 //constructor for App, call loadRoutes() for router field
@@ -16,6 +19,7 @@ type App struct {
 func New() *App {
     app := &App{
         router: loadRoutes(),
+        rdb: redis.NewClient(&redis.Options{}),
     }
     return app
 }
@@ -26,7 +30,14 @@ func (a *App) Start(ctx context.Context) error {
         Handler: a.router,
     }
 
-    err := server.ListenAndServe()
+    //checking if redis is connected, if not we don't even start the server
+    err := a.rdb.Ping(ctx).Err()
+    if err != nil {
+        return fmt.Errorf("failed to connect to redis: %w", err)
+    }
+
+    fmt.Println("Starting the server...")
+    err = server.ListenAndServe()
     if err != nil {
         return fmt.Errorf("failed to start the server: %w", err)
     }
