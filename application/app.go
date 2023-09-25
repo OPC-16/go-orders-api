@@ -12,14 +12,18 @@ import (
 type App struct {
     router http.Handler
     rdb *redis.Client
+    config Config
 }
 
 //constructor for App, call App.loadRoutes()
 //which creates new chi router, uses Logger middleware for logging
 //and adds basic http handler for GET method for "/" path as http.StatusOK
-func New() *App {
+func New(config Config) *App {
     app := &App{
-        rdb: redis.NewClient(&redis.Options{}),
+        rdb: redis.NewClient(&redis.Options{
+            Addr: config.RedisAddress,
+        }),
+        config: config,
     }
 
     app.loadRoutes()
@@ -29,7 +33,7 @@ func New() *App {
 
 func (a *App) Start(ctx context.Context) error {
     server := &http.Server {
-        Addr: ":3000",
+        Addr: fmt.Sprintf(":%d", a.config.ServerPort),
         Handler: a.router,
     }
 
