@@ -14,14 +14,16 @@ type App struct {
     rdb *redis.Client
 }
 
-//constructor for App, call loadRoutes() for router field
+//constructor for App, call App.loadRoutes()
 //which creates new chi router, uses Logger middleware for logging
 //and adds basic http handler for GET method for "/" path as http.StatusOK
 func New() *App {
     app := &App{
-        router: loadRoutes(),
         rdb: redis.NewClient(&redis.Options{}),
     }
+
+    app.loadRoutes()
+
     return app
 }
 

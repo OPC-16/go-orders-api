@@ -16,6 +16,7 @@ type Order struct {
 
 }
 
+//this represents each item
 type LineItem struct {
     ItemID uuid.UUID `json:"item_id"`
     Quantity uint    `json:"quantity"`
